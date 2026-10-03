@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -36,9 +35,21 @@ where
         self.len() == 0
     }
 
-    pub fn add(&mut self, value: T) {
-        //TODO
-    }
+pub fn add(&mut self, value: T) {
+self.count += 1;
+self.items.push(value);
+let mut idx = self.count;
+let cmp = self.comparator;
+while idx > 1 {
+let p = self.parent_idx(idx);
+if cmp(&self.items[idx], &self.items[p]) {
+self.items.swap(idx, p);
+idx = p;
+} else {
+break;
+}
+}
+}
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
@@ -56,10 +67,21 @@ where
         self.left_child_idx(idx) + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
-    }
+fn smallest_child_idx(&self, idx: usize) -> usize {
+let left = self.left_child_idx(idx);
+if left > self.count {
+return 0;
+}
+let right = self.right_child_idx(idx);
+if right > self.count {
+left
+} else if (self.comparator)(&self.items[left], &self.items[right]) {
+left
+} else {
+right
+}
+}
+
 }
 
 impl<T> Heap<T>
@@ -83,10 +105,30 @@ where
 {
     type Item = T;
 
-    fn next(&mut self) -> Option<T> {
-        //TODO
-		None
-    }
+fn next(&mut self) -> Option<T> {
+if self.count == 0 {
+return None;
+}
+let root = std::mem::replace(&mut self.items[1], T::default());
+let last = self.items.pop().unwrap();
+if self.count > 1 {
+self.items[1] = last;
+}
+self.count -= 1;
+let mut idx = 1;
+let cmp = self.comparator;
+while self.children_present(idx) {
+let child = self.smallest_child_idx(idx);
+if cmp(&self.items[child], &self.items[idx]) {
+self.items.swap(child, idx);
+idx = child;
+} else {
+break;
+}
+}
+Some(root)
+}
+
 }
 
 pub struct MinHeap;
